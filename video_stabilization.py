@@ -20,7 +20,7 @@ def smooth(trajectory):
     smoothed_trajectory = np.copy(trajectory) 
     # Filter the x, y and angle curves
     for i in range(3):
-      smoothed_trajectory[:,i] = movingAverage(trajectory[:,i], radius=SMOOTHING_RADIUS)
+        smoothed_trajectory[:,i] = movingAverage(trajectory[:,i], radius=SMOOTHING_RADIUS)
 
     return smoothed_trajectory
 
@@ -36,7 +36,7 @@ start_time = time.time()
 SMOOTHING_RADIUS=65 
 
 # Read input video
-cap = cv2.VideoCapture('another_vid.mp4') 
+cap = cv2.VideoCapture('video.mp4') 
  
 # Get frame count
 n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) 
@@ -49,10 +49,10 @@ h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = cap.get(cv2.CAP_PROP_FPS)
  
 # Define the codec for output video
-fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
  
 # Set up output video
-out = cv2.VideoWriter('video_out.avi', fourcc, fps, (2 * w, h))
+out = cv2.VideoWriter('video_out.mp4', fourcc, fps, (w//2 * 2, 2*h//3))
 
 # Read first frame
 _, prev = cap.read() 
@@ -74,7 +74,7 @@ for i in range(n_frames-2):
     # Read next frame
     success, curr = cap.read() 
     if not success: 
-      break 
+        break 
 
     # Convert to grayscale
     curr_gray = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY) 
@@ -128,7 +128,7 @@ for i in range(n_frames-2):
     # Read next frame
     success, frame = cap.read() 
     if not success:
-      break
+        break
 
     # Extract transformations from the new transformation array
     dx = transforms_smooth[i,0]
@@ -151,7 +151,13 @@ for i in range(n_frames-2):
     frame_stabilized = fixBorder(frame_stabilized) 
 
     # Write the frame to the file
-    frame_out = cv2.hconcat([frame, frame_stabilized])
+    # Resize frames to half of their original width
+    frame_resized = cv2.resize(frame, (w // 2, 2*h//3))
+    frame_stabilized_resized = cv2.resize(frame_stabilized, (w // 2, 2*h//3))
+
+# Concatenate resized frames
+    frame_out = cv2.hconcat([frame_resized, frame_stabilized_resized])
+
     
     # cv2.imshow("Before and After", frame_out)
     # cv2.waitKey(10)
